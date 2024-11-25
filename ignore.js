@@ -1,26 +1,7 @@
 const fs = require('fs');
 const path = require('path');
 
-const defaultIgnoreList = [
-  // Folders
-  'node_modules',
-  'vendor',
-  '.git',
-  '.idea',
-  'dist',
-  'build',
-  'coverage',
-  
-  // Images
-  'jpg', 'jpeg', 'png', 'gif', 'bmp', 'tiff', 'webp', 'svg', 'ico', 'psd', 'ai', 'eps', 'raw', 'xcf',
-  
-  // Known binary extensions
-  'exe', 'dll', 'so', 'dylib', 'bin', 'obj',
-  'db', 'sqlite', 'sqlite3', 'mdb',
-  'zip', 'tar', 'gz', '7z', 'rar',
-  'pdf', 'doc', 'docx', 'xls', 'xlsx',
-  'ttf', 'otf', 'woff', 'woff2',
-
+const skipContentFiles = [
   // Config and lock files
   'package-lock.json',
   'yarn.lock',
@@ -41,6 +22,28 @@ const defaultIgnoreList = [
   '.env.test'
 ];
 
+const skipTraversalFolders = [
+  'node_modules',
+  'vendor',
+  '.git',
+  '.idea',
+  'dist',
+  'build',
+  'coverage'
+];
+
+const skipContentExtensions = [
+  // Images
+  'jpg', 'jpeg', 'png', 'gif', 'bmp', 'tiff', 'webp', 'svg', 'ico', 'psd', 'ai', 'eps', 'raw', 'xcf',
+  
+  // Known binary extensions
+  'exe', 'dll', 'so', 'dylib', 'bin', 'obj',
+  'db', 'sqlite', 'sqlite3', 'mdb',
+  'zip', 'tar', 'gz', '7z', 'rar',
+  'pdf', 'doc', 'docx', 'xls', 'xlsx',
+  'ttf', 'otf', 'woff', 'woff2'
+];
+
 function isBinaryFile(filePath) {
   try {
     const buffer = Buffer.alloc(512);
@@ -59,39 +62,24 @@ function isBinaryFile(filePath) {
   }
 }
 
-function shouldIgnore(filepath) {
-  try {
-    const basename = path.basename(filepath);
-    const extension = path.extname(filepath).toLowerCase().replace('.', '');
-    
-    // Ignore directory check
-    if (defaultIgnoreList.includes(basename)) {
-      return true;
-    }
-
-    // Ignore extension check
-    if (extension && defaultIgnoreList.includes(extension)) {
-      return true;
-    }
-
-    // Ignore checking for folders / files with . at the start
-    if (basename.startsWith('.')) {
-      return true;
-    }
-
-    // Checking for binary 
-    if (fs.statSync(filepath).isFile()) {
-      const binary = isBinaryFile(filepath);
-      if (binary) {
-        return true;
-      }
-    }
-
-    return false;
-  } catch (error) {
-    console.error(`Error in shouldIgnore for ${filepath}:`, error.message);
-    return false; 
-  }
+function shouldSkipTraversal(filepath) {
+  const basename = path.basename(filepath);
+  return skipTraversalFolders.includes(basename);
 }
 
-module.exports = { defaultIgnoreList, shouldIgnore };
+function shouldSkipContent(filepath) {
+  const basename = path.basename(filepath);
+  const extension = path.extname(filepath).toLowerCase().replace('.', '');
+  
+  return skipContentFiles.includes(basename) || 
+         skipContentExtensions.includes(extension) || 
+         isBinaryFile(filepath);
+}
+
+module.exports = { 
+  shouldSkipTraversal, 
+  shouldSkipContent,
+  skipContentFiles,
+  skipTraversalFolders,
+  skipContentExtensions
+};
