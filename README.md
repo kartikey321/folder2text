@@ -107,7 +107,7 @@ Contributions are welcome! Feel free to:
 
 If you encounter any issues or have questions:
 
-- Check the [Issues page](https://github.com/your-repo/issues)  
+- Check the [Issues page](https://github.com/oritromax/folder2text/issues)  
 - Open a new issue if needed  
 - Join the discussion  
 
