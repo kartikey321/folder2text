@@ -1,7 +1,7 @@
 const fs = require('fs').promises;
 const path = require('path');
 const { program } = require('commander');
-const { shouldIgnore } = require('./ignore');
+const { shouldSkipTraversal, shouldSkipContent } = require('./ignore');
 
 program
   .argument('<folderPath>', 'Path to the target folder')
@@ -24,7 +24,7 @@ async function generateTree(dir, prefix = '') {
     const itemPath = path.join(dir, item);
     const stats = await fs.stat(itemPath);
     
-    if (shouldIgnore(itemPath)) continue;
+    if (shouldSkipTraversal(itemPath)) continue;
     
     const isLast = i === items.length - 1;
     const connector = isLast ? '└── ' : '├── ';
@@ -45,10 +45,7 @@ async function getAllFiles(dir) {
   
   for (const item of items) {
     const fullPath = path.join(dir, item);
-    if (shouldIgnore(fullPath)) {
-      console.log(`Skipping: ${fullPath}`);
-      continue;
-    }
+    if (shouldSkipTraversal(fullPath)) continue;
     
     const stats = await fs.stat(fullPath);
     
@@ -56,6 +53,7 @@ async function getAllFiles(dir) {
       const subFiles = await getAllFiles(fullPath);
       fileList.push(...subFiles);
     } else {
+      // Track all files in stats, regardless of content inclusion
       const ext = path.extname(fullPath).toLowerCase();
       fileTypes[ext] = (fileTypes[ext] || 0) + 1;
       
@@ -66,11 +64,14 @@ async function getAllFiles(dir) {
       
       totalFiles++;
       totalSize += stats.size;
-      fileList.push({
-        path: fullPath,
-        size: stats.size,
-        extension: ext
-      });
+    
+      if (!shouldSkipContent(fullPath)) {
+        fileList.push({
+          path: fullPath,
+          size: stats.size,
+          extension: ext
+        });
+      }
     }
   }
   return fileList;
