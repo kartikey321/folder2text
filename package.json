@@ -1,26 +1,38 @@
 {
   "name": "folder2text",
   "version": "0.0.1",
-  "description": "Print a entire project to one single txt file. ",
+  "description": "Convert entire project directories to a single text file, perfect for documentation and AI context sharing",
   "main": "index.js",
+  "bin": {
+    "folder2text": "./cli.js"
+  },
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "repository": {
     "type": "git",
-    "url": "github.com/oritromax/folder2text"
+    "url": "git+https://github.com/oritromax/folder2text.git"
   },
   "keywords": [
     "folder",
     "text",
     "conversion",
     "ai",
-    "llm"
+    "llm",
+    "documentation",
+    "project-analysis"
   ],
   "author": "Nidal Siddique Oritro",
-  "license": "ISC",
+  "license": "MIT AND Commons Clause",
   "dependencies": {
     "commander": "^12.1.0",
     "fs-extra": "^11.2.0"
+  },
+  "bugs": {
+    "url": "https://github.com/oritromax/folder2text/issues"
+  },
+  "homepage": "https://github.com/oritromax/folder2text#readme",
+  "engines": {
+    "node": ">=14.0.0"
   }
 }
