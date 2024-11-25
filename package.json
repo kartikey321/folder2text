@@ -1,0 +1,25 @@
+{
+  "name": "folder2text",
+  "version": "0.0.1",
+  "description": "Print a entire project to one single txt file. ",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "github.com/oritromax/folder2text"
+  },
+  "keywords": [
+    "folder",
+    "text",
+    "conversion",
+    "ai",
+    "llm"
+  ],
+  "author": "Nidal Siddique Oritro",
+  "license": "ISC",
+  "dependencies": {
+    "fs-extra": "^11.2.0"
+  }
+}
