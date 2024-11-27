@@ -15,7 +15,13 @@ let totalSize = 0;
 let fileTypes = {};
 let technologies = new Set();
 
-async function generateTree(dir, prefix = '') {
+function formatSize(bytes) {
+  if (bytes < 1024) return bytes + ' B';
+  if (bytes < 1024 * 1024) return (bytes / 1024).toFixed(2) + ' KB';
+  return (bytes / (1024 * 1024)).toFixed(2) + ' MB';
+}
+
+async function generateTree(dir, prefix = '', includedFiles = new Set()) {
   let result = '';
   const items = await fs.readdir(dir);
   
@@ -30,10 +36,14 @@ async function generateTree(dir, prefix = '') {
     const connector = isLast ? '└── ' : '├── ';
     const newPrefix = isLast ? '    ' : '│   ';
     
-    result += prefix + connector + item + '\n';
-    
-    if (stats.isDirectory()) {
-      result += await generateTree(itemPath, prefix + newPrefix);
+    if (stats.isFile()) {
+      const size = formatSize(stats.size);
+      const isIncluded = !shouldSkipContent(itemPath);
+      const indicator = isIncluded ? ' ✓' : ' ✗';
+      result += `${prefix}${connector}${item} (${size})${indicator}\n`;
+    } else {
+      result += `${prefix}${connector}${item}/\n`;
+      result += await generateTree(itemPath, prefix + newPrefix, includedFiles);
     }
   }
   return result;
@@ -77,12 +87,6 @@ async function getAllFiles(dir) {
   return fileList;
 }
 
-function formatSize(bytes) {
-  if (bytes < 1024) return bytes + ' B';
-  if (bytes < 1024 * 1024) return (bytes / 1024).toFixed(2) + ' KB';
-  return (bytes / (1024 * 1024)).toFixed(2) + ' MB';
-}
-
 async function main() {
   try {
     console.log('Starting to process directory:', folderPath);
@@ -99,11 +103,13 @@ async function main() {
     const folderName = path.basename(folderPath);
     const outputFileName = program.args[1] || `${folderName}_${dateStr}_${timestamp}.txt`;
     
-    console.log('Generating tree structure...');
-    const treeStructure = await generateTree(folderPath);
-    
     console.log('Collecting files...');
     const files = await getAllFiles(folderPath);
+    const includedFiles = new Set(files.map(f => f.path));
+    
+    console.log('Generating tree structure...');
+    const treeStructure = await generateTree(folderPath, '', includedFiles);
+    
     console.log(`Found ${files.length} files`);
     
     let output = 'Project Overview\n===============\n\n';
@@ -123,7 +129,8 @@ async function main() {
       output += `  - ${tech}\n`;
     });
     
-    output += '\nFolder Structure (Tree)\n=====================\n\n';
+    output += '\nFolder Structure (Tree)\n=====================\n';
+    output += 'Legend: ✓ = Included in output, ✗ = Excluded from output\n\n';
     output += treeStructure;
     output += '\n==============\n';
     
