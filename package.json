@@ -1,6 +1,6 @@
 {
   "name": "folder2text",
-  "version": "0.0.3",
+  "version": "0.0.4",
   "description": "Convert entire project directories to a single text file, perfect for documentation and AI context sharing",
   "main": "index.js",
   "bin": {
