@@ -19,7 +19,8 @@ const skipContentFiles = [
   '.env.local',
   '.env.development',
   '.env.production',
-  '.env.test'
+  '.env.test',
+  'composer.lock'
 ];
 
 const skipTraversalFolders = [
@@ -95,8 +96,15 @@ function isBinaryFile(filePath) {
 }
 
 function shouldSkipTraversal(filepath) {
-  const basename = path.basename(filepath);
-  return skipTraversalFolders.includes(basename);
+  const normalizedPath = filepath.replace(/\\/g, '/');
+  
+  return skipTraversalFolders.some(pattern => {
+    const regexPattern = pattern.includes('/') 
+      ? pattern.replace(/\//g, '[/\\\\]') 
+      : `(^|[/\\\\])${pattern}($|[/\\\\])`; 
+    
+    return new RegExp(regexPattern).test(normalizedPath);
+  });
 }
 
 function shouldSkipContent(filepath) {
