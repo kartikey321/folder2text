@@ -23,13 +23,45 @@ const skipContentFiles = [
 ];
 
 const skipTraversalFolders = [
+  // Common folders
   'node_modules',
   'vendor',
   '.git',
   '.idea',
   'dist',
   'build',
-  'coverage'
+  'coverage',
+  
+  // Symfony specific folders
+  'var/cache',
+  'var/log',
+  'var/sessions',
+  'var/tmp',
+  'public/bundles',
+  
+  // Laravel specific folders
+  'storage/app',
+  'storage/framework/cache',
+  'storage/framework/sessions',
+  'storage/framework/testing',
+  'storage/framework/views',
+  'storage/logs',
+  'bootstrap/cache',
+  'public/storage',
+  
+  // Additional framework caches
+  'temp',
+  'tmp',
+  'cache',
+  '.phpunit.cache',
+  '.php-cs-fixer.cache',
+  
+  // Dependencies and builds
+  'public/build',
+  'public/hot',
+  'public/css',
+  'public/js',
+  'public/mix-manifest.json'
 ];
 
 const skipContentExtensions = [
