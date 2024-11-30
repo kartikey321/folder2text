@@ -29,6 +29,8 @@ const skipTraversalFolders = [
   'vendor',
   '.git',
   '.idea',
+  '.vscode',
+  '.vs',
   'dist',
   'build',
   'coverage',
@@ -49,13 +51,31 @@ const skipTraversalFolders = [
   'storage/logs',
   'bootstrap/cache',
   'public/storage',
+
+  // JavaScript framework folders
+  '.next',
+  '.nuxt',
+  'out',
+  '.svelte-kit',
+  '.angular',
   
-  // Additional framework caches
+  // Build and cache directories
+  '.cache',
+  '.parcel-cache',
+  '.webpack',
+  '.turbo',
+  '.vite',
   'temp',
   'tmp',
   'cache',
   '.phpunit.cache',
   '.php-cs-fixer.cache',
+  
+  // Test folders
+  '.nyc_output',
+  'cypress/videos',
+  'cypress/screenshots',
+  '.cypress-cache',
   
   // Dependencies and builds
   'public/build',
