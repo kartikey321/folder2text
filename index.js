@@ -6,7 +6,7 @@ const { shouldSkipTraversal, shouldSkipContent } = require('./ignore');
 program
   .argument('<folderPath>', 'Path to the target folder')
   .argument('[outputName]', 'Output file name (optional)')
-  .option('-f, --filter <patterns>', 'Padrões adicionais para filtrar (separados por vírgula)')
+  .option('-f, --filter <patterns>', 'Additional patterns to filter (separated by commas)')
   .parse();
 
 const [folderPath] = program.args;
