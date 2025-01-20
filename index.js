@@ -6,9 +6,28 @@ const { shouldSkipTraversal, shouldSkipContent } = require('./ignore');
 program
   .argument('<folderPath>', 'Path to the target folder')
   .argument('[outputName]', 'Output file name (optional)')
+  .option('-f, --filter <patterns>', 'Additional patterns to filter (separated by commas)')
   .parse();
 
 const [folderPath] = program.args;
+const options = program.opts();
+const additionalFilters = options.filter ? options.filter.split(',').map(p => p.trim()) : [];
+
+const originalSkipTraversal = shouldSkipTraversal;
+const shouldSkipTraversalWithFilters = (filepath) => {
+  if (originalSkipTraversal(filepath)) {
+    return true;
+  }
+
+  const normalizedPath = filepath.replace(/\\/g, '/');
+  return additionalFilters.some(pattern => {
+    const regexPattern = pattern.includes('/') 
+      ? pattern.replace(/\//g, '[/\\\\]') 
+      : `(^|[/\\\\])${pattern}($|[/\\\\])`;
+    
+    return new RegExp(regexPattern).test(normalizedPath);
+  });
+};
 
 let totalFiles = 0;
 let totalSize = 0;
@@ -30,7 +49,7 @@ async function generateTree(dir, prefix = '', includedFiles = new Set()) {
     const itemPath = path.join(dir, item);
     const stats = await fs.stat(itemPath);
     
-    if (shouldSkipTraversal(itemPath)) continue;
+    if (shouldSkipTraversalWithFilters(itemPath)) continue;
     
     const isLast = i === items.length - 1;
     const connector = isLast ? '└── ' : '├── ';
@@ -55,7 +74,7 @@ async function getAllFiles(dir) {
   
   for (const item of items) {
     const fullPath = path.join(dir, item);
-    if (shouldSkipTraversal(fullPath)) continue;
+    if (shouldSkipTraversalWithFilters(fullPath)) continue;
     
     const stats = await fs.stat(fullPath);
     
