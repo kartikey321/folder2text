@@ -18,6 +18,10 @@ Convert entire project directories into a single, well-organized text file. Perf
   - Common directories (`node_modules`, `.git`, etc.)  
   - Media files (images, videos, etc.)
 
+- 🔧**Manual Filtering**: Option for Manually filtering Specific path and patterns
+  - 📄 **Output File**: Customizable output file name
+  - 🔍 **Filtering**: Option to filter specific paths or patterns
+
 ## Installation
 
 ### NPM (Node.js)
@@ -41,6 +45,15 @@ The output file will contain:
 ```bash
 folder2text /path/to/folder
 ```
+
+### Filter out specific folders
+```folder2text /path/to/folder --filter "tests,docs"```
+
+### Filter with path patterns
+```folder2text /path/to/folder --filter "src/tests,src/docs"```
+
+### Combined with output file name
+```folder2text /path/to/folder output.txt --filter "tests,examples,temp"```
 
 The output will look like:
 
