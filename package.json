@@ -26,7 +26,8 @@
   "license": "MIT AND Commons Clause",
   "dependencies": {
     "commander": "^12.1.0",
-    "fs-extra": "^11.2.0"
+    "fs-extra": "^11.2.0",
+    "ignore": "^7.0.5"
   },
   "bugs": {
     "url": "https://github.com/oritromax/folder2text/issues"
