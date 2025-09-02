@@ -3,13 +3,15 @@ const path = require('path');
 const { program } = require('commander');
 const ignore = require('ignore');
 const os = require('os');
+const readline = require('readline');
 const { shouldSkipTraversal, shouldSkipContent } = require('./ignore');
 
 program
-  .argument('<folderPath>', 'Path to the target folder')
+  .argument('[folderPath]', 'Path to the target folder (optional, defaults to current directory)')
   .argument('[outputName]', 'Output file name (optional)')
   .option('-f, --filter <patterns>', 'Additional patterns to filter (separated by commas)')
   .option('--filter-soft <patterns>', 'Soft filter patterns (comma separated)')
+  .option('-y, --yes', 'Skip confirmation when running in current directory')
 
   .option('-g, --gitignore', 'Respect .gitignore files in each folder (like Git)')
   .option('--gitignore-soft', 'Soft respect .gitignore files in each folder')
@@ -22,8 +24,58 @@ program
 
   .parse();
 
-const [folderPath] = program.args;
+const [folderPathArg] = program.args;
 const options = program.opts();
+
+// Function to ask for user confirmation
+function askConfirmation(question) {
+  const rl = readline.createInterface({
+    input: process.stdin,
+    output: process.stdout
+  });
+
+  return new Promise((resolve) => {
+    rl.question(question, (answer) => {
+      rl.close();
+      resolve(answer.toLowerCase().trim());
+    });
+  });
+}
+
+// Function to determine and confirm folder path
+async function determineFolderPath() {
+  let folderPath;
+  
+  if (folderPathArg) {
+    // Path was provided as argument
+    folderPath = folderPathArg;
+  } else {
+    // No path provided, use current directory
+    folderPath = process.cwd();
+    
+    // Skip confirmation if -y flag is provided
+    if (options.yes) {
+      console.log(`Using current directory: ${folderPath}`);
+    } else {
+      // Ask for confirmation
+      const currentDir = path.basename(folderPath);
+      const fullPath = folderPath;
+      
+      console.log(`\nNo folder path specified.`);
+      console.log(`Current directory: ${fullPath}`);
+      console.log(`Folder name: ${currentDir}`);
+      
+      const answer = await askConfirmation('\nDo you want to process the current directory? (y/N): ');
+      
+      if (answer !== 'y' && answer !== 'yes') {
+        console.log('Operation cancelled.');
+        process.exit(0);
+      }
+    }
+  }
+  
+  return folderPath;
+}
 
 function splitPatterns(input) {
   return input ? input.split(',').map(p => p.trim()) : [];
@@ -56,7 +108,7 @@ async function loadIgnoreFile(filePath) {
   }
 }
 
-async function buildIgnoreSets() {
+async function buildIgnoreSets(folderPath) {
   const hard = [];
   const soft = [];
 
@@ -207,13 +259,16 @@ async function getAllFiles(dir, parentHard = [], parentSoft = []) {
 // ---------------- Main ----------------
 async function main() {
   try {
+    // Determine and confirm folder path
+    const folderPath = await determineFolderPath();
+    
     console.log('Starting to process directory:', folderPath);
 
     const stats = await fs.stat(folderPath);
     if (!stats.isDirectory()) throw new Error('Provided path is not a directory');
 
     // Build global/specific stacks
-    const { hard, soft } = await buildIgnoreSets();
+    const { hard, soft } = await buildIgnoreSets(folderPath);
 
     const date = new Date();
     const dateStr = `${(date.getMonth() + 1).toString().padStart(2, '0')}${date
